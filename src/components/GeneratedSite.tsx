@@ -1,26 +1,43 @@
 
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { SiteData } from '@/utils/siteGenerator';
+import { SiteData, getSiteData } from '@/utils/siteGenerator';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const GeneratedSite = () => {
   const { siteId } = useParams();
   const [counter, setCounter] = useState({ years: 0, months: 0, days: 0, hours: 0 });
+  const [siteData, setSiteData] = useState<SiteData | null>(null);
   
-  // Dados simulados - em um app real, isso viria de um banco de dados
-  const siteData: SiteData = {
-    title: 'Nosso Amor',
-    partnerName1: 'Guilherme',
-    partnerName2: 'Isabela',
-    relationshipDate: '1998-10-08',
-    message: 'a muito tempo eu te amei, mas de forma platonica todo o amor foi criado mentalmente e nao de verdade para ambas as partes',
-    primaryColor: '#f06292',
-    photos: [],
-    youtubeUrl: ''
-  };
+  useEffect(() => {
+    if (siteId) {
+      const data = getSiteData(siteId);
+      if (data) {
+        setSiteData(data);
+      } else {
+        // Dados de fallback caso não encontre
+        setSiteData({
+          title: 'Nosso Amor',
+          partnerName1: 'Guilherme',
+          partnerName2: 'Isabela',
+          relationshipDate: '1998-10-08',
+          message: 'a muito tempo eu te amei, mas de forma platonica todo o amor foi criado mentalmente e nao de verdade para ambas as partes',
+          primaryColor: '#f06292',
+          photos: [],
+          youtubeUrl: ''
+        });
+      }
+    }
+  }, [siteId]);
 
   useEffect(() => {
-    if (!siteData.relationshipDate) return;
+    if (!siteData?.relationshipDate) return;
 
     const updateCounter = () => {
       const startDate = new Date(siteData.relationshipDate);
@@ -40,13 +57,21 @@ const GeneratedSite = () => {
     const interval = setInterval(updateCounter, 3600000);
     
     return () => clearInterval(interval);
-  }, [siteData.relationshipDate]);
+  }, [siteData?.relationshipDate]);
 
   const extractYouTubeVideoId = (url: string): string => {
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regex);
     return match ? match[1] : '';
   };
+
+  if (!siteData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Carregando...</div>
+      </div>
+    );
+  }
 
   const youtubeVideoId = siteData.youtubeUrl ? extractYouTubeVideoId(siteData.youtubeUrl) : '';
 
@@ -72,23 +97,34 @@ const GeneratedSite = () => {
         </header>
 
         {siteData.photos.length > 0 && (
-          <div className="flex gap-4 mb-8 justify-center flex-wrap">
-            {siteData.photos.map((photo, index) => (
-              <div 
-                key={index}
-                className="w-24 h-32 rounded-2xl overflow-hidden border-3 shadow-lg"
-                style={{ 
-                  borderColor: siteData.primaryColor,
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
-                }}
-              >
-                <img 
-                  src={photo} 
-                  alt={`Foto ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
+          <div className="w-full max-w-md mb-8">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {siteData.photos.map((photo, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-1">
+                      <div 
+                        className="aspect-[9/16] rounded-2xl overflow-hidden border-4 shadow-lg mx-auto"
+                        style={{ 
+                          borderColor: siteData.primaryColor,
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+                          maxHeight: '400px',
+                          width: 'auto'
+                        }}
+                      >
+                        <img 
+                          src={photo} 
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="text-white border-white hover:bg-white/20" />
+              <CarouselNext className="text-white border-white hover:bg-white/20" />
+            </Carousel>
           </div>
         )}
         

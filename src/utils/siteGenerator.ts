@@ -1,3 +1,4 @@
+
 export interface SiteData {
   title: string;
   partnerName1: string;
@@ -8,6 +9,9 @@ export interface SiteData {
   photos: string[];
   youtubeUrl: string;
 }
+
+// Mapa para armazenar os dados dos sites gerados
+const generatedSites = new Map<string, SiteData>();
 
 export const generateHTML = (data: SiteData): string => {
   const youtubeVideoId = data.youtubeUrl ? extractYouTubeVideoId(data.youtubeUrl) : '';
@@ -313,10 +317,15 @@ const extractYouTubeVideoId = (url: string): string => {
   return match ? match[1] : '';
 };
 
-// Simular salvamento e gerar URL
+// Gerar URL única e salvar dados do site
 export const generateSiteUrl = (data: SiteData): string => {
-  const siteId = Math.random().toString(36).substring(2, 15);
-  // Em um cenário real, aqui você salvaria os arquivos no servidor
+  const siteId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  generatedSites.set(siteId, data);
   console.log('Site gerado:', { siteId, data });
   return `/${siteId}`;
+};
+
+// Buscar dados do site pelo ID
+export const getSiteData = (siteId: string): SiteData | null => {
+  return generatedSites.get(siteId) || null;
 };

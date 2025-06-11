@@ -1,6 +1,13 @@
 
 import { SiteData } from '@/utils/siteGenerator';
 import { useEffect, useState } from 'react';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface LoveCounterPreviewProps {
   data: SiteData;
@@ -67,20 +74,33 @@ const LoveCounterPreview = ({ data }: LoveCounterPreviewProps) => {
         </div>
 
         {data.photos.length > 0 && (
-          <div className="flex gap-2 mb-6 animate-fade-in">
-            {data.photos.map((photo, index) => (
-              <div 
-                key={index}
-                className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20"
-                style={{ borderColor: data.primaryColor }}
-              >
-                <img 
-                  src={photo} 
-                  alt={`Foto ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
+          <div className="w-full max-w-xs mb-6 animate-fade-in">
+            <Carousel className="w-full">
+              <CarouselContent>
+                {data.photos.map((photo, index) => (
+                  <CarouselItem key={index}>
+                    <div className="p-1">
+                      <div 
+                        className="aspect-[9/16] rounded-lg overflow-hidden border-2 border-white/20 mx-auto"
+                        style={{ 
+                          borderColor: data.primaryColor,
+                          maxHeight: '200px',
+                          width: 'auto'
+                        }}
+                      >
+                        <img 
+                          src={photo} 
+                          alt={`Foto ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="text-white border-white hover:bg-white/20 -left-8" />
+              <CarouselNext className="text-white border-white hover:bg-white/20 -right-8" />
+            </Carousel>
           </div>
         )}
         
