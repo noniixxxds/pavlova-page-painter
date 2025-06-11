@@ -1,8 +1,8 @@
 
-import SiteGenerator from '@/components/SiteGenerator';
+import LoveCounterGenerator from '@/components/LoveCounterGenerator';
 
 const Index = () => {
-  return <SiteGenerator />;
+  return <LoveCounterGenerator />;
 };
 
 export default Index;
