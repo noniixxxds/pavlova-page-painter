@@ -1,4 +1,3 @@
-
 export interface SiteData {
   title: string;
   partnerName1: string;
@@ -319,13 +318,26 @@ const extractYouTubeVideoId = (url: string): string => {
 
 // Gerar URL única e salvar dados do site
 export const generateSiteUrl = (data: SiteData): string => {
-  const siteId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  // Gerar um ID único e mais longo para evitar colisões
+  const siteId = Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
+  
+  // Salvar os dados no mapa
   generatedSites.set(siteId, data);
-  console.log('Site gerado:', { siteId, data });
-  return `/${siteId}`;
+  
+  console.log('Site gerado com ID:', siteId);
+  console.log('Dados salvos:', data);
+  console.log('Sites armazenados:', Array.from(generatedSites.keys()));
+  
+  return siteId;
 };
 
 // Buscar dados do site pelo ID
 export const getSiteData = (siteId: string): SiteData | null => {
-  return generatedSites.get(siteId) || null;
+  console.log('Buscando site com ID:', siteId);
+  console.log('Sites disponíveis:', Array.from(generatedSites.keys()));
+  
+  const data = generatedSites.get(siteId);
+  console.log('Dados encontrados:', data);
+  
+  return data || null;
 };

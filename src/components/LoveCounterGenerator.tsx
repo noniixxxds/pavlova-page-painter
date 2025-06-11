@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -74,12 +73,18 @@ const LoveCounterGenerator = () => {
 
   const generateSite = () => {
     try {
-      const url = generateSiteUrl(siteData);
-      setGeneratedUrl(url);
+      const siteId = generateSiteUrl(siteData);
+      const fullUrl = `/${siteId}`;
+      setGeneratedUrl(fullUrl);
+      
+      console.log('Site criado com ID:', siteId);
+      console.log('URL completa:', fullUrl);
+      
       toast.success('Site gerado com sucesso!', {
         description: 'Seu site de amor está pronto para ser compartilhado.'
       });
     } catch (error) {
+      console.error('Erro ao gerar site:', error);
       toast.error('Erro ao gerar o site', {
         description: 'Tente novamente ou verifique os dados inseridos.'
       });
