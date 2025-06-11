@@ -18,7 +18,9 @@ const SiteGenerator = () => {
     partnerName2: 'Partner 2',
     relationshipDate: '2024-01-01',
     message: 'Este é um exemplo de mensagem que pode conter informações sobre seu relacionamento ou qualquer conteúdo que você deseje compartilhar.',
-    primaryColor: '#6366f1'
+    primaryColor: '#6366f1',
+    photos: [],
+    youtubeUrl: ''
   });
 
   const [activeTab, setActiveTab] = useState('form');
