@@ -7,15 +7,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Eye, Palette, Type, FileText } from 'lucide-react';
-import { SiteData, downloadSiteFiles } from '@/utils/siteGenerator';
+import { SiteData, generateSiteUrl } from '@/utils/siteGenerator';
 import SitePreview from './SitePreview';
 import { toast } from 'sonner';
 
 const SiteGenerator = () => {
   const [siteData, setSiteData] = useState<SiteData>({
     title: 'Meu Site Incrível',
-    subtitle: 'Criando experiências digitais únicas',
-    paragraph: 'Este é um exemplo de parágrafo que pode conter informações sobre seu negócio, serviços ou qualquer conteúdo que você deseje compartilhar com seus visitantes.',
+    partnerName1: 'Partner 1',
+    partnerName2: 'Partner 2',
+    relationshipDate: '2024-01-01',
+    message: 'Este é um exemplo de mensagem que pode conter informações sobre seu relacionamento ou qualquer conteúdo que você deseje compartilhar.',
     primaryColor: '#6366f1'
   });
 
@@ -30,9 +32,9 @@ const SiteGenerator = () => {
 
   const handleGenerateSite = () => {
     try {
-      downloadSiteFiles(siteData);
+      const url = generateSiteUrl(siteData);
       toast.success('Site gerado com sucesso!', {
-        description: 'Os arquivos HTML e CSS foram baixados automaticamente.'
+        description: `Seu site está disponível em: ${url}`
       });
     } catch (error) {
       toast.error('Erro ao gerar o site', {
@@ -95,28 +97,38 @@ const SiteGenerator = () => {
                       id="title"
                       value={siteData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
-                      placeholder="Ex: Minha Empresa"
+                      placeholder="Ex: João & Maria"
                       className="text-lg"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="subtitle">Subtítulo</Label>
+                    <Label htmlFor="partnerName1">Primeiro Nome</Label>
                     <Input
-                      id="subtitle"
-                      value={siteData.subtitle}
-                      onChange={(e) => handleInputChange('subtitle', e.target.value)}
-                      placeholder="Ex: Soluções inovadoras para seu negócio"
+                      id="partnerName1"
+                      value={siteData.partnerName1}
+                      onChange={(e) => handleInputChange('partnerName1', e.target.value)}
+                      placeholder="Ex: João"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="paragraph">Parágrafo Principal</Label>
+                    <Label htmlFor="partnerName2">Segundo Nome</Label>
+                    <Input
+                      id="partnerName2"
+                      value={siteData.partnerName2}
+                      onChange={(e) => handleInputChange('partnerName2', e.target.value)}
+                      placeholder="Ex: Maria"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Mensagem Especial</Label>
                     <Textarea
-                      id="paragraph"
-                      value={siteData.paragraph}
-                      onChange={(e) => handleInputChange('paragraph', e.target.value)}
-                      placeholder="Descreva seu negócio, serviços ou proposta de valor..."
+                      id="message"
+                      value={siteData.message}
+                      onChange={(e) => handleInputChange('message', e.target.value)}
+                      placeholder="Escreva uma mensagem romântica..."
                       rows={4}
                       className="resize-none"
                     />

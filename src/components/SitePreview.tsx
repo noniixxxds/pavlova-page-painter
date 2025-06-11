@@ -33,13 +33,13 @@ const SitePreview = ({ data }: SitePreviewProps) => {
             {data.title}
           </h1>
           <h2 className="text-xl md:text-2xl text-gray-600 font-light mb-6">
-            {data.subtitle}
+            {data.partnerName1} ❤️ {data.partnerName2}
           </h2>
         </div>
         
         <div className="max-w-2xl animate-fade-in">
           <p className="text-lg text-gray-700 mb-8 leading-relaxed">
-            {data.paragraph}
+            {data.message}
           </p>
           <button 
             className="px-8 py-3 rounded-full text-white font-semibold text-lg transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
