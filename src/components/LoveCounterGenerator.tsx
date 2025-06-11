@@ -1,10 +1,11 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, ArrowRight, Link2, Calendar, MessageSquare, Palette } from 'lucide-react';
+import { Heart, ArrowRight, Link2, Calendar, MessageSquare, Palette, Image, Music } from 'lucide-react';
 import { SiteData, generateSiteUrl } from '@/utils/siteGenerator';
 import LoveCounterPreview from './LoveCounterPreview';
 import { toast } from 'sonner';
@@ -18,21 +19,44 @@ const LoveCounterGenerator = () => {
     partnerName2: '',
     relationshipDate: '',
     message: '',
-    primaryColor: '#e91e63'
+    primaryColor: '#e91e63',
+    photos: [],
+    youtubeUrl: ''
   });
 
   const steps = [
     { number: 1, title: 'Título', icon: Heart, description: 'Nome da sua página de amor' },
     { number: 2, title: 'Casal', icon: Heart, description: 'Nomes do casal' },
     { number: 3, title: 'Data', icon: Calendar, description: 'Data do início do relacionamento' },
-    { number: 4, title: 'Mensagem', icon: MessageSquare, description: 'Mensagem especial' },
-    { number: 5, title: 'Cor', icon: Palette, description: 'Cor principal do site' }
+    { number: 4, title: 'Fotos', icon: Image, description: 'Adicione até 3 fotos' },
+    { number: 5, title: 'Música', icon: Music, description: 'Link do YouTube' },
+    { number: 6, title: 'Mensagem', icon: MessageSquare, description: 'Mensagem especial' },
+    { number: 7, title: 'Cor', icon: Palette, description: 'Cor principal do site' }
   ];
 
   const handleInputChange = (field: keyof SiteData, value: string) => {
     setSiteData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const fileArray = Array.from(files).slice(0, 3 - siteData.photos.length);
+      const newPhotos = fileArray.map(file => URL.createObjectURL(file));
+      setSiteData(prev => ({
+        ...prev,
+        photos: [...prev.photos, ...newPhotos].slice(0, 3)
+      }));
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setSiteData(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, i) => i !== index)
     }));
   };
 
@@ -63,14 +87,8 @@ const LoveCounterGenerator = () => {
   };
 
   const predefinedColors = [
-    '#e91e63', // Pink
-    '#f06292', // Light Pink
-    '#ad1457', // Dark Pink
-    '#880e4f', // Very Dark Pink
-    '#ff5722', // Deep Orange
-    '#ff9800', // Orange
-    '#9c27b0', // Purple
-    '#673ab7', // Deep Purple
+    '#e91e63', '#f06292', '#ad1457', '#880e4f',
+    '#ff5722', '#ff9800', '#9c27b0', '#673ab7',
   ];
 
   const isStepValid = () => {
@@ -78,8 +96,10 @@ const LoveCounterGenerator = () => {
       case 1: return siteData.title.trim() !== '';
       case 2: return siteData.partnerName1.trim() !== '' && siteData.partnerName2.trim() !== '';
       case 3: return siteData.relationshipDate !== '';
-      case 4: return siteData.message.trim() !== '';
-      case 5: return siteData.primaryColor !== '';
+      case 4: return true; // Fotos são opcionais
+      case 5: return true; // Música é opcional
+      case 6: return siteData.message.trim() !== '';
+      case 7: return siteData.primaryColor !== '';
       default: return false;
     }
   };
@@ -100,13 +120,13 @@ const LoveCounterGenerator = () => {
             <div className="bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-300">
               <div className="flex items-center justify-center gap-2 text-lg font-mono">
                 <Link2 className="w-5 h-5" />
-                {generatedUrl}
+                {window.location.origin}{generatedUrl}
               </div>
             </div>
             
             <div className="flex gap-4 justify-center">
               <Button 
-                onClick={() => navigator.clipboard.writeText(generatedUrl)}
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}${generatedUrl}`)}
                 variant="outline"
               >
                 Copiar Link
@@ -129,7 +149,9 @@ const LoveCounterGenerator = () => {
                   partnerName2: '',
                   relationshipDate: '',
                   message: '',
-                  primaryColor: '#e91e63'
+                  primaryColor: '#e91e63',
+                  photos: [],
+                  youtubeUrl: ''
                 });
               }}
               variant="ghost"
@@ -195,7 +217,7 @@ const LoveCounterGenerator = () => {
                       id="title"
                       value={siteData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
-                      placeholder="Ex: João & Maria ou Feliz Aniversário ou etc"
+                      placeholder="Ex: João & Maria"
                       className="text-lg"
                     />
                   </div>
@@ -237,6 +259,67 @@ const LoveCounterGenerator = () => {
                 )}
 
                 {currentStep === 4 && (
+                  <div className="space-y-4">
+                    <Label>Adicionar fotos (até 3)</Label>
+                    <div className="space-y-4">
+                      {siteData.photos.length < 3 && (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handlePhotoUpload}
+                            className="hidden"
+                            id="photo-upload"
+                          />
+                          <Label htmlFor="photo-upload" className="cursor-pointer">
+                            <Image className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                            <p className="text-gray-600">Clique para adicionar fotos</p>
+                            <p className="text-sm text-gray-400">Formato stories (9:16)</p>
+                          </Label>
+                        </div>
+                      )}
+                      
+                      {siteData.photos.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2">
+                          {siteData.photos.map((photo, index) => (
+                            <div key={index} className="relative aspect-[9/16] bg-gray-100 rounded-lg overflow-hidden">
+                              <img 
+                                src={photo} 
+                                alt={`Foto ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <Button
+                                onClick={() => removePhoto(index)}
+                                className="absolute top-1 right-1 w-6 h-6 p-0 bg-red-500 hover:bg-red-600"
+                                size="sm"
+                              >
+                                ×
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 5 && (
+                  <div className="space-y-2">
+                    <Label htmlFor="youtube">Link do YouTube (opcional)</Label>
+                    <Input
+                      id="youtube"
+                      value={siteData.youtubeUrl}
+                      onChange={(e) => handleInputChange('youtubeUrl', e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                    />
+                    <p className="text-sm text-gray-500">
+                      Cole o link de uma música especial do YouTube
+                    </p>
+                  </div>
+                )}
+
+                {currentStep === 6 && (
                   <div className="space-y-2">
                     <Label htmlFor="message">Mensagem especial</Label>
                     <Textarea
@@ -250,7 +333,7 @@ const LoveCounterGenerator = () => {
                   </div>
                 )}
 
-                {currentStep === 5 && (
+                {currentStep === 7 && (
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="primaryColor">Cor principal</Label>

@@ -32,6 +32,14 @@ const LoveCounterPreview = ({ data }: LoveCounterPreviewProps) => {
     return () => clearInterval(interval);
   }, [data.relationshipDate]);
 
+  const extractYouTubeVideoId = (url: string): string => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : '';
+  };
+
+  const youtubeVideoId = data.youtubeUrl ? extractYouTubeVideoId(data.youtubeUrl) : '';
+
   return (
     <div className="w-full max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-lg shadow-xl overflow-hidden">
       <div className="bg-gray-800 px-4 py-2 flex items-center space-x-2">
@@ -46,7 +54,7 @@ const LoveCounterPreview = ({ data }: LoveCounterPreviewProps) => {
       </div>
       
       <div className="p-8 min-h-[500px] flex flex-col justify-center items-center text-center text-white">
-        <div className="mb-8 animate-fade-in">
+        <div className="mb-6 animate-fade-in">
           <h1 
             className="text-4xl md:text-5xl font-bold mb-4"
             style={{ color: data.primaryColor }}
@@ -57,53 +65,86 @@ const LoveCounterPreview = ({ data }: LoveCounterPreviewProps) => {
             {data.partnerName1 || 'Partner 1'} ❤️ {data.partnerName2 || 'Partner 2'}
           </p>
         </div>
+
+        {data.photos.length > 0 && (
+          <div className="flex gap-2 mb-6 animate-fade-in">
+            {data.photos.map((photo, index) => (
+              <div 
+                key={index}
+                className="w-16 h-20 rounded-lg overflow-hidden border-2 border-white/20"
+                style={{ borderColor: data.primaryColor }}
+              >
+                <img 
+                  src={photo} 
+                  alt={`Foto ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 w-full max-w-2xl animate-fade-in">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 w-full max-w-xl animate-fade-in">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20">
             <div 
-              className="text-3xl font-bold mb-2"
+              className="text-2xl font-bold mb-1"
               style={{ color: data.primaryColor }}
             >
               {counter.years}
             </div>
-            <div className="text-sm text-gray-300 uppercase tracking-wider">Anos</div>
+            <div className="text-xs text-gray-300 uppercase tracking-wider">Anos</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20">
             <div 
-              className="text-3xl font-bold mb-2"
+              className="text-2xl font-bold mb-1"
               style={{ color: data.primaryColor }}
             >
               {counter.months}
             </div>
-            <div className="text-sm text-gray-300 uppercase tracking-wider">Meses</div>
+            <div className="text-xs text-gray-300 uppercase tracking-wider">Meses</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20">
             <div 
-              className="text-3xl font-bold mb-2"
+              className="text-2xl font-bold mb-1"
               style={{ color: data.primaryColor }}
             >
               {counter.days}
             </div>
-            <div className="text-sm text-gray-300 uppercase tracking-wider">Dias</div>
+            <div className="text-xs text-gray-300 uppercase tracking-wider">Dias</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/20">
             <div 
-              className="text-3xl font-bold mb-2"
+              className="text-2xl font-bold mb-1"
               style={{ color: data.primaryColor }}
             >
               {counter.hours}
             </div>
-            <div className="text-sm text-gray-300 uppercase tracking-wider">Horas</div>
+            <div className="text-xs text-gray-300 uppercase tracking-wider">Horas</div>
           </div>
         </div>
         
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 max-w-2xl animate-fade-in">
-          <p className="text-lg text-gray-300 italic leading-relaxed">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 max-w-lg mb-4 animate-fade-in">
+          <p className="text-sm text-gray-300 italic leading-relaxed">
             {data.message || 'Sua mensagem especial aparecerá aqui...'}
           </p>
         </div>
+
+        {youtubeVideoId && (
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 max-w-lg mb-4 animate-fade-in">
+            <div className="aspect-video rounded-lg overflow-hidden">
+              <iframe 
+                src={`https://www.youtube.com/embed/${youtubeVideoId}?controls=1&autoplay=0`}
+                className="w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="YouTube video player"
+              />
+            </div>
+          </div>
+        )}
         
-        <div className="mt-auto pt-8">
+        <div className="mt-auto pt-6">
           <p className="text-gray-500 text-sm">
             © 2024 {data.title || 'Love Counter'}. Feito com ❤️
           </p>

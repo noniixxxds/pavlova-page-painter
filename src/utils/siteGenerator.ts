@@ -1,4 +1,3 @@
-
 export interface SiteData {
   title: string;
   partnerName1: string;
@@ -6,9 +5,13 @@ export interface SiteData {
   relationshipDate: string;
   message: string;
   primaryColor: string;
+  photos: string[];
+  youtubeUrl: string;
 }
 
 export const generateHTML = (data: SiteData): string => {
+  const youtubeVideoId = data.youtubeUrl ? extractYouTubeVideoId(data.youtubeUrl) : '';
+  
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -23,6 +26,16 @@ export const generateHTML = (data: SiteData): string => {
             <h1 class="title">${data.title}</h1>
             <p class="subtitle">${data.partnerName1} ❤️ ${data.partnerName2}</p>
         </header>
+        
+        ${data.photos.length > 0 ? `
+        <div class="photos-section">
+            ${data.photos.map(photo => `
+                <div class="photo-story">
+                    <img src="${photo}" alt="Foto do casal" />
+                </div>
+            `).join('')}
+        </div>
+        ` : ''}
         
         <main class="main">
             <div class="counter-section">
@@ -47,6 +60,19 @@ export const generateHTML = (data: SiteData): string => {
             <div class="message-section">
                 <p class="message">${data.message}</p>
             </div>
+            
+            ${youtubeVideoId ? `
+            <div class="music-section">
+                <div class="youtube-player">
+                    <iframe 
+                        src="https://www.youtube.com/embed/${youtubeVideoId}?controls=1&autoplay=0" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            ` : ''}
         </main>
         
         <footer class="footer">
@@ -73,7 +99,7 @@ export const generateHTML = (data: SiteData): string => {
         }
         
         updateCounter();
-        setInterval(updateCounter, 3600000); // Atualiza a cada hora
+        setInterval(updateCounter, 3600000);
     </script>
 </body>
 </html>`;
@@ -107,7 +133,7 @@ body {
 }
 
 .header {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     animation: fadeInUp 0.8s ease-out;
 }
 
@@ -125,6 +151,30 @@ body {
     font-weight: 300;
 }
 
+.photos-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeInUp 0.8s ease-out 0.1s both;
+}
+
+.photo-story {
+    width: 120px;
+    height: 160px;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 3px solid ${data.primaryColor};
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.photo-story img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .main {
     margin-bottom: 3rem;
     animation: fadeInUp 0.8s ease-out 0.2s both;
@@ -132,14 +182,15 @@ body {
 
 .counter-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 2rem;
-    margin-bottom: 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    max-width: 500px;
 }
 
 .counter-item {
     background: rgba(255, 255, 255, 0.1);
-    padding: 2rem 1rem;
+    padding: 1.5rem 1rem;
     border-radius: 20px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -152,7 +203,7 @@ body {
 
 .counter-number {
     display: block;
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: 700;
     color: ${data.primaryColor};
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -160,7 +211,7 @@ body {
 
 .counter-label {
     display: block;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #e0e0e0;
     margin-top: 0.5rem;
     text-transform: uppercase;
@@ -173,6 +224,8 @@ body {
     border-radius: 20px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 2rem;
+    max-width: 600px;
 }
 
 .message {
@@ -180,6 +233,25 @@ body {
     line-height: 1.8;
     color: #e0e0e0;
     font-style: italic;
+}
+
+.music-section {
+    margin-bottom: 2rem;
+}
+
+.youtube-player {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.youtube-player iframe {
+    width: 100%;
+    max-width: 560px;
+    height: 200px;
+    border-radius: 10px;
 }
 
 .footer {
@@ -210,15 +282,35 @@ body {
         font-size: 2rem;
     }
     
+    .photos-section {
+        gap: 0.5rem;
+    }
+    
+    .photo-story {
+        width: 100px;
+        height: 130px;
+    }
+    
     .counter-section {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
+        max-width: 300px;
     }
     
     .counter-number {
-        font-size: 2rem;
+        font-size: 1.5rem;
+    }
+    
+    .youtube-player iframe {
+        height: 150px;
     }
 }`;
+};
+
+const extractYouTubeVideoId = (url: string): string => {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : '';
 };
 
 // Simular salvamento e gerar URL
@@ -226,5 +318,5 @@ export const generateSiteUrl = (data: SiteData): string => {
   const siteId = Math.random().toString(36).substring(2, 15);
   // Em um cenário real, aqui você salvaria os arquivos no servidor
   console.log('Site gerado:', { siteId, data });
-  return `https://love-counter-${siteId}.lovable.app`;
+  return `/${siteId}`;
 };
