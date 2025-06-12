@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { SiteData } from '@/utils/siteGenerator';
 import { getMiniSiteByUrl, convertMiniSiteToSiteData } from '@/utils/miniSiteService';
+import EmojiRain from './EmojiRain';
 import {
   Carousel,
   CarouselContent,
@@ -15,6 +16,7 @@ const GeneratedSite = () => {
   const [counter, setCounter] = useState({ years: 0, months: 0, days: 0, hours: 0 });
   const [siteData, setSiteData] = useState<SiteData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEmojiRain, setShowEmojiRain] = useState(false);
   
   useEffect(() => {
     const loadSiteData = async () => {
@@ -87,6 +89,10 @@ const GeneratedSite = () => {
     return match ? match[1] : '';
   };
 
+  const toggleEmojiRain = () => {
+    setShowEmojiRain(!showEmojiRain);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
@@ -110,7 +116,20 @@ const GeneratedSite = () => {
       background: 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
+      <EmojiRain isActive={showEmojiRain} />
+      
       <div className="max-w-4xl mx-auto px-4 py-8 min-h-screen flex flex-col justify-center items-center text-center text-white">
+        {/* Botão de chuva de emojis */}
+        <button
+          onClick={toggleEmojiRain}
+          className="fixed top-4 right-4 z-50 bg-white/20 backdrop-blur-md rounded-full p-3 border border-white/30 hover:bg-white/30 transition-all duration-300"
+          style={{ color: siteData.primaryColor }}
+        >
+          <span className="text-2xl">
+            {showEmojiRain ? '🌧️' : '❤️'}
+          </span>
+        </button>
+
         <header className="mb-8">
           <h1 
             className="text-5xl md:text-6xl font-bold mb-4 animate-fade-in"

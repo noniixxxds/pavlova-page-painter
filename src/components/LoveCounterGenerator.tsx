@@ -4,16 +4,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, ArrowRight, Link2, Calendar, MessageSquare, Palette, Image, Music } from 'lucide-react';
+import { Heart, ArrowRight, Link2, Calendar, MessageSquare, Palette, Image, Music, Download, QrCode } from 'lucide-react';
 import { SiteData } from '@/utils/siteGenerator';
 import LoveCounterPreview from './LoveCounterPreview';
 import { toast } from 'sonner';
 import { saveMiniSite } from '@/utils/miniSiteService';
+import QRCode from 'qrcode';
 
 const LoveCounterGenerator = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [generatedUrl, setGeneratedUrl] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
   const [siteData, setSiteData] = useState<SiteData>({
     title: '',
     partnerName1: '',
@@ -73,12 +75,40 @@ const LoveCounterGenerator = () => {
     }
   };
 
+  const generateQRCode = async (url: string) => {
+    try {
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      setQrCodeDataUrl(qrDataUrl);
+    } catch (error) {
+      console.error('Erro ao gerar QR Code:', error);
+    }
+  };
+
+  const downloadQRCode = () => {
+    if (qrCodeDataUrl) {
+      const link = document.createElement('a');
+      link.download = `qr-code-${siteData.title.replace(/\s+/g, '-').toLowerCase()}.png`;
+      link.href = qrCodeDataUrl;
+      link.click();
+    }
+  };
+
   const generateSite = async () => {
     setIsGenerating(true);
     try {
       const siteUrl = await saveMiniSite(siteData);
-      const fullUrl = `/${siteUrl}`;
+      const fullUrl = `${window.location.origin}/${siteUrl}`;
       setGeneratedUrl(fullUrl);
+      
+      // Gerar QR Code
+      await generateQRCode(fullUrl);
       
       console.log('Site criado com URL:', siteUrl);
       console.log('URL completa:', fullUrl);
@@ -128,30 +158,55 @@ const LoveCounterGenerator = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-300">
-              <div className="flex items-center justify-center gap-2 text-lg font-mono">
-                <Link2 className="w-5 h-5" />
-                {window.location.origin}{generatedUrl}
+              <div className="flex items-center justify-center gap-2 text-lg font-mono break-all">
+                <Link2 className="w-5 h-5 flex-shrink-0" />
+                {generatedUrl}
               </div>
             </div>
             
-            <div className="flex gap-4 justify-center">
+            {qrCodeDataUrl && (
+              <div className="flex flex-col items-center space-y-4">
+                <div className="bg-white p-4 rounded-lg border shadow-sm">
+                  <img src={qrCodeDataUrl} alt="QR Code" className="w-48 h-48" />
+                </div>
+                <p className="text-sm text-gray-600">
+                  Escaneie o QR Code para acessar o site
+                </p>
+              </div>
+            )}
+            
+            <div className="flex flex-wrap gap-4 justify-center">
               <Button 
-                onClick={() => navigator.clipboard.writeText(`${window.location.origin}${generatedUrl}`)}
+                onClick={() => navigator.clipboard.writeText(generatedUrl)}
                 variant="outline"
+                className="flex items-center gap-2"
               >
+                <Link2 className="w-4 h-4" />
                 Copiar Link
               </Button>
               <Button 
                 onClick={() => window.open(generatedUrl, '_blank')}
-                className="bg-pink-600 hover:bg-pink-700"
+                className="bg-pink-600 hover:bg-pink-700 flex items-center gap-2"
               >
+                <Heart className="w-4 h-4" />
                 Abrir Site
               </Button>
+              {qrCodeDataUrl && (
+                <Button 
+                  onClick={downloadQRCode}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Baixar QR Code
+                </Button>
+              )}
             </div>
             
             <Button 
               onClick={() => {
                 setGeneratedUrl('');
+                setQrCodeDataUrl('');
                 setCurrentStep(1);
                 setSiteData({
                   title: '',
