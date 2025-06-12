@@ -1,7 +1,7 @@
-
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { SiteData, getSiteData } from '@/utils/siteGenerator';
+import { SiteData } from '@/utils/siteGenerator';
+import { getMiniSiteByUrl, convertMiniSiteToSiteData } from '@/utils/miniSiteService';
 import {
   Carousel,
   CarouselContent,
@@ -14,26 +14,48 @@ const GeneratedSite = () => {
   const { siteId } = useParams();
   const [counter, setCounter] = useState({ years: 0, months: 0, days: 0, hours: 0 });
   const [siteData, setSiteData] = useState<SiteData | null>(null);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    if (siteId) {
-      const data = getSiteData(siteId);
-      if (data) {
-        setSiteData(data);
-      } else {
-        // Dados de fallback caso não encontre
-        setSiteData({
-          title: 'Nosso Amor',
-          partnerName1: 'Guilherme',
-          partnerName2: 'Isabela',
-          relationshipDate: '1998-10-08',
-          message: 'a muito tempo eu te amei, mas de forma platonica todo o amor foi criado mentalmente e nao de verdade para ambas as partes',
-          primaryColor: '#f06292',
-          photos: [],
-          youtubeUrl: ''
-        });
+    const loadSiteData = async () => {
+      if (siteId) {
+        try {
+          const miniSite = await getMiniSiteByUrl(siteId);
+          if (miniSite) {
+            const convertedData = convertMiniSiteToSiteData(miniSite);
+            setSiteData(convertedData);
+          } else {
+            // Dados de fallback caso não encontre
+            setSiteData({
+              title: 'Site não encontrado',
+              partnerName1: 'Partner',
+              partnerName2: 'Partner',
+              relationshipDate: '2024-01-01',
+              message: 'Este site não foi encontrado ou pode ter expirado.',
+              primaryColor: '#f06292',
+              photos: [],
+              youtubeUrl: ''
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao carregar site:', error);
+          setSiteData({
+            title: 'Erro ao carregar',
+            partnerName1: 'Partner',
+            partnerName2: 'Partner',
+            relationshipDate: '2024-01-01',
+            message: 'Ocorreu um erro ao carregar este site.',
+            primaryColor: '#f06292',
+            photos: [],
+            youtubeUrl: ''
+          });
+        } finally {
+          setLoading(false);
+        }
       }
-    }
+    };
+
+    loadSiteData();
   }, [siteId]);
 
   useEffect(() => {
@@ -65,10 +87,18 @@ const GeneratedSite = () => {
     return match ? match[1] : '';
   };
 
-  if (!siteData) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-white text-xl">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!siteData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Site não encontrado</div>
       </div>
     );
   }

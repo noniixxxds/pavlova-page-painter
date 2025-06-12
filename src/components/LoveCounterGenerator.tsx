@@ -5,13 +5,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, ArrowRight, Link2, Calendar, MessageSquare, Palette, Image, Music } from 'lucide-react';
-import { SiteData, generateSiteUrl } from '@/utils/siteGenerator';
+import { SiteData } from '@/utils/siteGenerator';
 import LoveCounterPreview from './LoveCounterPreview';
 import { toast } from 'sonner';
+import { saveMiniSite } from '@/utils/miniSiteService';
 
 const LoveCounterGenerator = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [generatedUrl, setGeneratedUrl] = useState<string>('');
+  const [isGenerating, setIsGenerating] = useState(false);
   const [siteData, setSiteData] = useState<SiteData>({
     title: '',
     partnerName1: '',
@@ -71,13 +73,14 @@ const LoveCounterGenerator = () => {
     }
   };
 
-  const generateSite = () => {
+  const generateSite = async () => {
+    setIsGenerating(true);
     try {
-      const siteId = generateSiteUrl(siteData);
-      const fullUrl = `/${siteId}`;
+      const siteUrl = await saveMiniSite(siteData);
+      const fullUrl = `/${siteUrl}`;
       setGeneratedUrl(fullUrl);
       
-      console.log('Site criado com ID:', siteId);
+      console.log('Site criado com URL:', siteUrl);
       console.log('URL completa:', fullUrl);
       
       toast.success('Site gerado com sucesso!', {
@@ -88,6 +91,8 @@ const LoveCounterGenerator = () => {
       toast.error('Erro ao gerar o site', {
         description: 'Tente novamente ou verifique os dados inseridos.'
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -386,6 +391,7 @@ const LoveCounterGenerator = () => {
                       onClick={prevStep}
                       variant="outline"
                       className="flex-1"
+                      disabled={isGenerating}
                     >
                       Voltar
                     </Button>
@@ -394,7 +400,7 @@ const LoveCounterGenerator = () => {
                   {currentStep < steps.length ? (
                     <Button 
                       onClick={nextStep}
-                      disabled={!isStepValid()}
+                      disabled={!isStepValid() || isGenerating}
                       className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
                     >
                       Próxima etapa
@@ -403,10 +409,10 @@ const LoveCounterGenerator = () => {
                   ) : (
                     <Button 
                       onClick={generateSite}
-                      disabled={!isStepValid()}
+                      disabled={!isStepValid() || isGenerating}
                       className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
                     >
-                      Gerar Site
+                      {isGenerating ? 'Gerando...' : 'Gerar Site'}
                       <Heart className="w-4 h-4 ml-2" />
                     </Button>
                   )}
