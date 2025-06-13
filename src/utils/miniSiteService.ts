@@ -24,10 +24,10 @@ export const saveMiniSite = async (siteData: SiteData): Promise<string> => {
       page_title: siteData.title,
       message: siteData.message,
       start_date: siteData.relationshipDate,
-      photos: siteData.photos,
+      photos: siteData.photos, // Now storing base64 strings directly
       youtube_url: siteData.youtubeUrl,
       contact_name: `${siteData.partnerName1} & ${siteData.partnerName2}`,
-      contact_email: 'contato@lovesite.com', // You might want to collect this from the user
+      contact_email: 'contato@lovesite.com',
       site_url: siteUrl,
       payment_status: 'free'
     }
@@ -100,7 +100,7 @@ export const convertMiniSiteToSiteData = (miniSite: MiniSiteData): SiteData => {
     relationshipDate: miniSite.start_date || '',
     message: miniSite.message || '',
     primaryColor: '#e91e63', // Default color, you might want to store this in the database
-    photos: miniSite.photos || [],
+    photos: miniSite.photos || [], // Base64 strings will work on mobile
     youtubeUrl: miniSite.youtube_url || ''
   }
 }

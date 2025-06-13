@@ -16,6 +16,7 @@ const LoveCounterGenerator = () => {
   const [generatedUrl, setGeneratedUrl] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [siteData, setSiteData] = useState<SiteData>({
     title: '',
     partnerName1: '',
@@ -44,15 +45,54 @@ const LoveCounterGenerator = () => {
     }));
   };
 
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      const fileArray = Array.from(files).slice(0, 3 - siteData.photos.length);
-      const newPhotos = fileArray.map(file => URL.createObjectURL(file));
-      setSiteData(prev => ({
-        ...prev,
-        photos: [...prev.photos, ...newPhotos].slice(0, 3)
-      }));
+      setUploadingPhotos(true);
+      try {
+        const fileArray = Array.from(files).slice(0, 3 - siteData.photos.length);
+        const base64Photos: string[] = [];
+        
+        for (const file of fileArray) {
+          // Verificar se é uma imagem
+          if (!file.type.startsWith('image/')) {
+            toast.error('Por favor, selecione apenas arquivos de imagem');
+            continue;
+          }
+          
+          // Verificar tamanho do arquivo (máximo 5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            toast.error('Imagem muito grande. Máximo 5MB por foto');
+            continue;
+          }
+          
+          const base64 = await convertToBase64(file);
+          base64Photos.push(base64);
+        }
+        
+        setSiteData(prev => ({
+          ...prev,
+          photos: [...prev.photos, ...base64Photos].slice(0, 3)
+        }));
+        
+        if (base64Photos.length > 0) {
+          toast.success(`${base64Photos.length} foto(s) adicionada(s) com sucesso!`);
+        }
+      } catch (error) {
+        console.error('Erro ao processar fotos:', error);
+        toast.error('Erro ao processar as fotos. Tente novamente.');
+      } finally {
+        setUploadingPhotos(false);
+      }
     }
   };
 
@@ -61,6 +101,7 @@ const LoveCounterGenerator = () => {
       ...prev,
       photos: prev.photos.filter((_, i) => i !== index)
     }));
+    toast.success('Foto removida com sucesso!');
   };
 
   const nextStep = () => {
@@ -336,11 +377,16 @@ const LoveCounterGenerator = () => {
                             onChange={handlePhotoUpload}
                             className="hidden"
                             id="photo-upload"
+                            disabled={uploadingPhotos}
                           />
                           <Label htmlFor="photo-upload" className="cursor-pointer">
                             <Image className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                            <p className="text-gray-600">Clique para adicionar fotos</p>
-                            <p className="text-sm text-gray-400">Formato stories (9:16)</p>
+                            <p className="text-gray-600">
+                              {uploadingPhotos ? 'Processando fotos...' : 'Clique para adicionar fotos'}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              Formato stories (9:16) - Máximo 5MB por foto
+                            </p>
                           </Label>
                         </div>
                       )}
@@ -446,7 +492,7 @@ const LoveCounterGenerator = () => {
                       onClick={prevStep}
                       variant="outline"
                       className="flex-1"
-                      disabled={isGenerating}
+                      disabled={isGenerating || uploadingPhotos}
                     >
                       Voltar
                     </Button>
@@ -455,7 +501,7 @@ const LoveCounterGenerator = () => {
                   {currentStep < steps.length ? (
                     <Button 
                       onClick={nextStep}
-                      disabled={!isStepValid() || isGenerating}
+                      disabled={!isStepValid() || isGenerating || uploadingPhotos}
                       className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
                     >
                       Próxima etapa
@@ -464,7 +510,7 @@ const LoveCounterGenerator = () => {
                   ) : (
                     <Button 
                       onClick={generateSite}
-                      disabled={!isStepValid() || isGenerating}
+                      disabled={!isStepValid() || isGenerating || uploadingPhotos}
                       className="flex-1 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700"
                     >
                       {isGenerating ? 'Gerando...' : 'Gerar Site'}
