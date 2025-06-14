@@ -56,7 +56,7 @@ const LoveCounterPreview = ({ data }: LoveCounterPreviewProps) => {
           <div className="w-3 h-3 bg-green-500 rounded-full"></div>
         </div>
         <div className="bg-gray-700 rounded px-3 py-1 text-sm text-gray-300 flex-1">
-          love-counter-{Math.random().toString(36).substring(2, 8)}.lovable.app
+          love-counter-{Math.random().toString(36).substring(2, 8)}.lovecounter.app
         </div>
       </div>
       
