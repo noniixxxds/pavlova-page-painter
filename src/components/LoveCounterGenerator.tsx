@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Heart, ArrowRight, Link2, Calendar, MessageSquare, Palette, Image, Music, Download, QrCode } from 'lucide-react';
+import { Heart, ArrowRight, Link2, Calendar, MessageSquare, Palette, Image, Music, Download, QrCode, Camera, Upload } from 'lucide-react';
 import { SiteData } from '@/utils/siteGenerator';
 import LoveCounterPreview from './LoveCounterPreview';
 import { toast } from 'sonner';
@@ -93,6 +93,33 @@ const LoveCounterGenerator = () => {
       } finally {
         setUploadingPhotos(false);
       }
+    }
+  };
+
+  // Função para detectar se está em um webview restritivo
+  const isRestrictiveWebView = () => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    return userAgent.includes('tiktok') || 
+           userAgent.includes('instagram') || 
+           userAgent.includes('facebook') ||
+           userAgent.includes('twitter') ||
+           userAgent.includes('linkedin');
+  };
+
+  // Função para abrir no navegador externo
+  const openInExternalBrowser = () => {
+    const currentUrl = window.location.href;
+    
+    // Tentar diferentes métodos para abrir no navegador externo
+    if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
+      // iOS
+      window.location.href = `googlechrome://${currentUrl.replace('https://', '')}`;
+      setTimeout(() => {
+        window.location.href = `safari-${currentUrl}`;
+      }, 500);
+    } else {
+      // Android
+      window.location.href = `intent://${currentUrl.replace('https://', '')}#Intent;scheme=https;package=com.android.chrome;end`;
     }
   };
 
@@ -367,6 +394,34 @@ const LoveCounterGenerator = () => {
                 {currentStep === 4 && (
                   <div className="space-y-4">
                     <Label>Adicionar fotos (até 3)</Label>
+                    
+                    {/* Aviso para webviews restritivos */}
+                    {isRestrictiveWebView() && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="text-yellow-600">⚠️</div>
+                          <div className="text-sm">
+                            <p className="font-medium text-yellow-800 mb-2">
+                              Problema para adicionar fotos?
+                            </p>
+                            <p className="text-yellow-700 mb-3">
+                              Alguns aplicativos (como TikTok) limitam o acesso à galeria. 
+                              Para adicionar fotos, abra este site no seu navegador.
+                            </p>
+                            <Button 
+                              onClick={openInExternalBrowser}
+                              size="sm"
+                              variant="outline"
+                              className="text-yellow-700 border-yellow-300 hover:bg-yellow-100"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Abrir no Navegador
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="space-y-4">
                       {siteData.photos.length < 3 && (
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -378,15 +433,26 @@ const LoveCounterGenerator = () => {
                             className="hidden"
                             id="photo-upload"
                             disabled={uploadingPhotos}
+                            capture="environment"
                           />
                           <Label htmlFor="photo-upload" className="cursor-pointer">
-                            <Image className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                            <p className="text-gray-600">
-                              {uploadingPhotos ? 'Processando fotos...' : 'Clique para adicionar fotos'}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              Formato stories (9:16) - Máximo 5MB por foto
-                            </p>
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="flex gap-2">
+                                <Image className="w-8 h-8 text-gray-400" />
+                                <Camera className="w-8 h-8 text-gray-400" />
+                              </div>
+                              <div>
+                                <p className="text-gray-600 font-medium">
+                                  {uploadingPhotos ? 'Processando fotos...' : 'Adicionar fotos'}
+                                </p>
+                                <p className="text-sm text-gray-400 mt-1">
+                                  Toque para escolher da galeria ou tirar foto
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Formato stories (9:16) - Máximo 5MB por foto
+                                </p>
+                              </div>
+                            </div>
                           </Label>
                         </div>
                       )}
