@@ -396,6 +396,7 @@ const LoveCounterGenerator = () => {
                     <Label>Adicionar fotos (até 3)</Label>
                     
                     {/* Aviso para webviews restritivos */}
+                    <input type="file" />
                     {isRestrictiveWebView() && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <div className="flex items-start gap-3">
